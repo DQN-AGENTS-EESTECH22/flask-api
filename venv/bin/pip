@@ -1,4 +1,4 @@
-#!/Users/guilherme/Sites/eestech/flask-api/venv/bin/python3.9
+#!/Users/guilherme/Sites/eestech/flask-api/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
