@@ -5,11 +5,10 @@ import json
 from flask import Flask, request
 import os
 from io import BytesIO
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app)
 
 
 def filter_pixels(pixels: np.ndarray, low=0.0, high=1.0) -> np.ndarray:
@@ -34,7 +33,6 @@ def open_img(img):
 
 
 @app.route("/model", methods=['POST'])
-@cross_origin()
 def pallete():
     try:
         n_clusters = 5
@@ -62,8 +60,3 @@ def pallete():
     except Exception as e:
         print('EXCEPTION:', str(e))
         return 'Error processing image', 500
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 9000))
-    app.run(host='0.0.0.0', port=port)
