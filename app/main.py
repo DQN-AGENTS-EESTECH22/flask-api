@@ -104,16 +104,30 @@ def from_text():
     rgb = np.array([r,g,b],dtype=np.int32)
 
     hsv = colorsys.rgb_to_hsv(pred[0],pred[1],pred[2])
-    hsv2 = ((hsv[0]+0.5)%1,hsv[1],hsv[2])
+
+    hsv2 = ((hsv[0]+0.5)%1,1-hsv[1],1-hsv[2])
+
     rgb2 = colorsys.hsv_to_rgb(hsv2[0],hsv2[1],hsv2[2])
     r2,g2,b2 = int(rgb2[0]*255),int(rgb2[1]*255),int(rgb2[2]*255)
     
     HEX = '#%02x%02x%02x' % (r, g, b) # HEX
     HEX2 = '#%02x%02x%02x' % (r2, g2, b2) # HEX
     dic = {'0': HEX, '1':HEX2}
-    print(dic)
-    return json.dumps(dic)
     
+    return json.dumps(dic)
+
+
+@app.route("/update-style", methods=['GET'])
+def updateStyle():
+    h1 = request.args.get("hex1")
+    h2 = request.args.get("hex2")
+    h3 = request.args.get("hex3")
+    h4 = request.args.get("hex4")
+    h5 = request.args.get("hex5")
+    print(h1)
+    with open('../../interface/dev/scss/_variables.scss', 'w') as f:
+        f.write(f'$primary: #{h1};\n$secondary: #{h2};\n$third: #{h3};\n$fourth: #{h4};\n$fifth: #{h5}')
+    return 'Ok'
 
 
 if __name__ == "__main__":
