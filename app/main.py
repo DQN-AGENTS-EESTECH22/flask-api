@@ -5,10 +5,11 @@ import json
 from flask import Flask, request
 import os
 from io import BytesIO
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 def filter_pixels(pixels: np.ndarray, low=0.0, high=1.0) -> np.ndarray:
@@ -33,6 +34,7 @@ def open_img(img):
 
 
 @app.route("/model", methods=['POST'])
+@cross_origin()
 def pallete():
     try:
         n_clusters = 5
