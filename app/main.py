@@ -1,11 +1,19 @@
 import numpy as np
 from PIL import Image
-from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.cluster import KMeans
 import json
 from flask import Flask, request
 import os
 from io import BytesIO
 from flask_cors import CORS
+
+from tensorflow.python.keras import preprocessing
+#from tensorflow.keras.layers.experimental import preprocessing
+from tensorflow.python.keras.preprocessing.text import Tokenizer
+from keras.utils import np_utils
+import pandas
+from tensorflow.keras.models import load_model
+import pickle 
 
 app = Flask(__name__)
 CORS(app)
@@ -65,6 +73,33 @@ def pallete():
     except Exception as e:
         print('EXCEPTION:', str(e))
         return 'Error processing image', 500
+
+
+###### TEXT TO COLOR MODEL
+
+# Load the model
+model = load_model('tr_model')
+
+# Load trained Tokenizer
+with open('tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
+
+def scale(n):
+    return int(n * 255) 
+
+@app.route("/text", methods=['GET'])
+def from_text():
+    name = request.args.get("search").lower() ### REQUEST THAT NAME...
+    tokenized = tokenizer.texts_to_sequences([name])
+    padded = preprocessing.sequence.pad_sequences(tokenized, maxlen=25)
+    one_hot = np_utils.to_categorical(padded, num_classes=28)
+    pred = model.predict(np.array(one_hot))[0]
+    r, g, b = scale(pred[0]), scale(pred[1]), scale(pred[2])
+    
+    HEX = '#%02x%02x%02x' % (r, g, b) # HEX
+    dic = {'0': HEX}
+    return json.dumps(dic)
+    
 
 
 if __name__ == "__main__":
