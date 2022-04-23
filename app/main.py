@@ -15,6 +15,8 @@ import pandas
 from tensorflow.keras.models import load_model
 import pickle 
 
+import colorsys
+
 app = Flask(__name__)
 CORS(app)
 
@@ -45,6 +47,8 @@ def home():
     return 'hello world'
 
 
+
+
 @app.route("/model", methods=['POST'])
 def pallete():
     try:
@@ -63,9 +67,11 @@ def pallete():
         rgb = centers * 255
         rgb = rgb.astype(np.int64)
 
+        
         dic = {}
         for i, x in enumerate(rgb):
-            dic[str(i)] = x.tolist()
+            HEX = '#%02x%02x%02x' % (x[0], x[1], x[2]) # HEX
+            dic[str(i)] = HEX
 
         print(dic)
         return json.dumps(dic)
@@ -95,9 +101,17 @@ def from_text():
     one_hot = np_utils.to_categorical(padded, num_classes=28)
     pred = model.predict(np.array(one_hot))[0]
     r, g, b = scale(pred[0]), scale(pred[1]), scale(pred[2])
+    rgb = np.array([r,g,b],dtype=np.int32)
+
+    hsv = colorsys.rgb_to_hsv(pred[0],pred[1],pred[2])
+    hsv2 = ((hsv[0]+0.5)%1,hsv[1],hsv[2])
+    rgb2 = colorsys.hsv_to_rgb(hsv2[0],hsv2[1],hsv2[2])
+    r2,g2,b2 = int(rgb2[0]*255),int(rgb2[1]*255),int(rgb2[2]*255)
     
     HEX = '#%02x%02x%02x' % (r, g, b) # HEX
-    dic = {'0': HEX}
+    HEX2 = '#%02x%02x%02x' % (r2, g2, b2) # HEX
+    dic = {'0': HEX, '1':HEX2}
+    print(dic)
     return json.dumps(dic)
     
 
